@@ -10,7 +10,7 @@ import (
 )
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
-	filePath := r.URL.Query().Get("path") // original path
+	filePath := r.URL.Query().Get("path") 
 	chunkNumber := r.URL.Query().Get("chunk")
 
 	if filePath == "" || chunkNumber == "" {
@@ -18,7 +18,6 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Create the same folder structure as original file path
 	log.Printf(filePath)
 	saveDir := filepath.Join("./uploaded_files", filepath.Dir(filePath))
 	if err := os.MkdirAll(saveDir, os.ModePerm); err != nil {
@@ -26,7 +25,6 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Append chunks to the file
 	savePath := filepath.Join("./uploaded_files", filePath)
 	f, err := os.OpenFile(savePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
