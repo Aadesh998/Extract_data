@@ -12,9 +12,8 @@ import (
 	"time"
 )
 
-const chunkSize = 1024 * 1024 // 1 MB per chunk
+const chunkSize = 1024 * 1024 
 
-// Uploads a file in chunks to the server
 func uploadFileInChunks(filePath string) error {
 	fileName := fmt.Sprintf("%d_%s", time.Now().Unix(), filepath.Base(filePath))
 	file, err := os.Open(filePath)
@@ -36,7 +35,6 @@ func uploadFileInChunks(filePath string) error {
 			break
 		}
 
-		// Upload chunk
 		url := fmt.Sprintf("http://localhost:8080/uploads?path=%s&chunk=%d",
 			filepath.ToSlash(fileName), chunkNum)
 
@@ -53,7 +51,6 @@ func uploadFileInChunks(filePath string) error {
 	return nil
 }
 
-// Checks if a folder should be considered a user folder
 func isUserFolder(name string) bool {
 	systemFolders := []string{
 		"$RECYCLE.BIN",
@@ -71,7 +68,6 @@ func isUserFolder(name string) bool {
 	return true
 }
 
-// Lists top-level folders from a drive, excluding system folders
 func readDriveFiles(rootDir string) ([]string, error) {
 	files, err := os.ReadDir(rootDir)
 	if err != nil {
