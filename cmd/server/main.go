@@ -1,0 +1,51 @@
+package main
+
+import (
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"os"
+	"path/filepath"
+)
+
+func uploadHandler(w http.ResponseWriter, r *http.Request) {
+	filePath := r.URL.Query().Get("path") // original path
+	chunkNumber := r.URL.Query().Get("chunk")
+
+	if filePath == "" || chunkNumber == "" {
+		http.Error(w, "Missing path or chunk number", http.StatusBadRequest)
+		return
+	}
+
+	// Create the same folder structure as original file path
+	log.Printf(filePath)
+	saveDir := filepath.Join("./uploaded_files", filepath.Dir(filePath))
+	if err := os.MkdirAll(saveDir, os.ModePerm); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Append chunks to the file
+	savePath := filepath.Join("./uploaded_files", filePath)
+	f, err := os.OpenFile(savePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer f.Close()
+
+	_, err = io.Copy(f, r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, "Chunk %s for file %s uploaded successfully", chunkNumber, filePath)
+}
+
+func main() {
+	http.HandleFunc("/uploads", uploadHandler)
+	fmt.Println("Server started on :8080")
+	http.ListenAndServe(":8080", nil)
+}
