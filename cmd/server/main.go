@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -10,7 +11,7 @@ import (
 )
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
-	filePath := r.URL.Query().Get("path") 
+	filePath := r.URL.Query().Get("path")
 	chunkNumber := r.URL.Query().Get("chunk")
 
 	if filePath == "" || chunkNumber == "" {
@@ -42,8 +43,18 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Chunk %s for file %s uploaded successfully", chunkNumber, filePath)
 }
 
+func checkhealthHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusAccepted)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"health":  "up to date",
+	})
+}
+
 func main() {
 	http.HandleFunc("/uploads", uploadHandler)
+	http.HandleFunc("/health", checkhealthHandler)
 	fmt.Println("Server started on :8080")
 	http.ListenAndServe(":8080", nil)
 }
